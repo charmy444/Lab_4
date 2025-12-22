@@ -35,7 +35,7 @@ class BookCollection:
         self.books.remove(book)
 
 
-class BookIndex:
+class IndexDict:
     def __init__(self) -> None:
         self.isbn_index: dict[str, Book] = {}
         self.author_index: dict[str, list[Book]] = {}
@@ -84,4 +84,64 @@ class BookIndex:
             self.year_index[book.year].remove(book)
             if not self.year_index[book.year]:
                 del self.year_index[book.year]
+
+
+class Library:
+    def __init__(self) -> None:
+        self.book_collection: BookCollection = BookCollection()
+        self.index_dict: IndexDict = IndexDict()
+    
+    def add_book(self, book: Book) -> None:
+        self.book_collection.add(book)
+        self.index_dict.add(book)
+    
+    def remove_book(self, book: Book) -> None:
+        self.book_collection.remove(book)
+        self.index_dict.remove(book)
+    
+    def search_by_isbn(self, isbn: str) -> Book | None:
+        try:
+            return self.index_dict[isbn]
+        except KeyError:
+            return None
+    
+    def search_by_author(self, author: str) -> BookCollection:
+        result = BookCollection()
+        try:
+            books = self.index_dict[author]
+            if isinstance(books, list):
+                for book in books:
+                    result.add(book)
+            else:
+                result.add(books)
+        except KeyError:
+            pass
+        return result
+    
+    def search_by_year(self, year: int) -> BookCollection:
+        result = BookCollection()
+        try:
+            books = self.index_dict[year]
+            if isinstance(books, list):
+                for book in books:
+                    result.add(book)
+            else:
+                result.add(books)
+        except KeyError:
+            pass
+        return result
+    
+    def search_by_title(self, title: str) -> BookCollection:
+        result = BookCollection()
+        for book in self.book_collection:
+            if book.title == title:
+                result.add(book)
+        return result
+    
+    def search_by_genre(self, genre: str) -> BookCollection:
+        result = BookCollection()
+        for book in self.book_collection:
+            if book.genre == genre:
+                result.add(book)
+        return result
 
