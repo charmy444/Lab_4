@@ -144,4 +144,13 @@ class Library:
             if book.genre == genre:
                 result.add(book)
         return result
+    
+    def update_index(self) -> None:
+        """
+        Обновляет индекс на основе текущей коллекции книг.
+        Пересоздает все индексы заново.
+        """
+        self.index_dict = IndexDict()
+        for book in self.book_collection:
+            self.index_dict.add(book)
 
