@@ -1,13 +1,5 @@
 class Book:
-    def __init__(
-        self,
-        title: str,
-        author: str,
-        year: int,
-        genre: str,
-        isbn: str,
-    ) -> None:
-
+    def __init__(self, title: str, author: str, year: int, genre: str, isbn: str):
         self.title = title
         self.author = author
         self.year = year
@@ -16,31 +8,36 @@ class Book:
 
 
 class BookCollection:
-    def __init__(self) -> None:
+    def __init__(self):
         self.books: list[Book] = []
-    
-    def __getitem__(self, key: int | slice) -> Book | list[Book]:
+        self.len_books = 0
+
+    def __getitem__(self, key: int | slice):
         return self.books[key]
-    
+
     def __iter__(self):
         return iter(self.books)
-    
+
     def __len__(self) -> int:
-        return len(self.books)
-    
-    def add(self, book: Book) -> None:
+        return self.len_books
+
+    def add(self, book: Book):
         self.books.append(book)
-    
-    def remove(self, book: Book) -> None:
+        self.len_books += 1
+
+    def remove(self, book: Book):
+        if book not in self.books:
+            raise ValueError("такая книга не существует")
         self.books.remove(book)
+        self.len_books -= 1
 
 
 class IndexDict:
-    def __init__(self) -> None:
+    def __init__(self):
         self.isbn_index: dict[str, Book] = {}
         self.author_index: dict[str, list[Book]] = {}
         self.year_index: dict[int, list[Book]] = {}
-    
+
     def __getitem__(self, key: str | int) -> Book | list[Book]:
         if isinstance(key, str):
             if key in self.isbn_index:
@@ -51,35 +48,34 @@ class IndexDict:
             if key in self.year_index:
                 return self.year_index[key]
         raise KeyError(key)
-    
+
     def __iter__(self):
         return iter(self.isbn_index.values())
-    
+
     def __len__(self) -> int:
         return len(self.isbn_index)
-    
+
     def add(self, book: Book) -> None:
         self.isbn_index[book.isbn] = book
-        
+
         if book.author not in self.author_index:
             self.author_index[book.author] = []
         self.author_index[book.author].append(book)
-        
+
         if book.year not in self.year_index:
             self.year_index[book.year] = []
         self.year_index[book.year].append(book)
-    
+
     def remove(self, book: Book) -> None:
         if book.isbn not in self.isbn_index:
             raise KeyError(f"Книга с ISBN {book.isbn} не найдена")
-        
+
         del self.isbn_index[book.isbn]
-        
         if book.author in self.author_index:
             self.author_index[book.author].remove(book)
             if not self.author_index[book.author]:
                 del self.author_index[book.author]
-        
+
         if book.year in self.year_index:
             self.year_index[book.year].remove(book)
             if not self.year_index[book.year]:
@@ -88,23 +84,23 @@ class IndexDict:
 
 class Library:
     def __init__(self) -> None:
-        self.book_collection: BookCollection = BookCollection()
-        self.index_dict: IndexDict = IndexDict()
-    
+        self.book_collection = BookCollection()
+        self.index_dict = IndexDict()
+
     def add_book(self, book: Book) -> None:
         self.book_collection.add(book)
         self.index_dict.add(book)
-    
+
     def remove_book(self, book: Book) -> None:
         self.book_collection.remove(book)
         self.index_dict.remove(book)
-    
+
     def search_by_isbn(self, isbn: str) -> Book | None:
         try:
             return self.index_dict[isbn]
         except KeyError:
             return None
-    
+
     def search_by_author(self, author: str) -> BookCollection:
         result = BookCollection()
         try:
@@ -117,7 +113,7 @@ class Library:
         except KeyError:
             pass
         return result
-    
+
     def search_by_year(self, year: int) -> BookCollection:
         result = BookCollection()
         try:
@@ -130,21 +126,21 @@ class Library:
         except KeyError:
             pass
         return result
-    
+
     def search_by_title(self, title: str) -> BookCollection:
         result = BookCollection()
         for book in self.book_collection:
             if book.title == title:
                 result.add(book)
         return result
-    
+
     def search_by_genre(self, genre: str) -> BookCollection:
         result = BookCollection()
         for book in self.book_collection:
             if book.genre == genre:
                 result.add(book)
         return result
-    
+
     def update_index(self) -> None:
         """
         Обновляет индекс на основе текущей коллекции книг.
@@ -153,4 +149,3 @@ class Library:
         self.index_dict = IndexDict()
         for book in self.book_collection:
             self.index_dict.add(book)
-

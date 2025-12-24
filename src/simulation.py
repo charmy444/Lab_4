@@ -1,8 +1,5 @@
 import random
-try:
-    from .book import Library, Book
-except ImportError:
-    from book import Library, Book
+from src.book import Library, Book
 
 
 def generate_random_isbn() -> str:

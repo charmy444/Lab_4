@@ -1,7 +1,4 @@
-try:
-    from .simulation import run_simulation
-except ImportError:
-    from simulation import run_simulation
+from src.simulation import run_simulation
 
 
 def main() -> None:
